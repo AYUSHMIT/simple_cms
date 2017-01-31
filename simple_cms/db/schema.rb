@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170110100850) do
+ActiveRecord::Schema.define(version: 20170116060630) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -24,8 +24,12 @@ ActiveRecord::Schema.define(version: 20170110100850) do
   end
 
   create_table "users", force: true do |t|
-    t.string "first_name", limit: 25
-    t.string "last_name",  limit: 50
+    t.string   "first_name",            limit: 25
+    t.string   "last_name",             limit: 50
+    t.string   "pictures_file_name"
+    t.string   "pictures_content_type"
+    t.integer  "pictures_file_size"
+    t.datetime "pictures_updated_at"
   end
 
 end
