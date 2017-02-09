@@ -35,7 +35,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.example.blubirch.myapplication_camera.R.id.etResponse;
 
@@ -43,6 +45,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 {
 
+
+    public static Map<String, Integer> inventories = new HashMap<>();
+     public int counter=0;
     private static String logtag = "cameraApp";
     private static int TAKE_PICTURE = 1;
     private Uri imageUri;

@@ -48,7 +48,8 @@ import cz.msebera.android.httpclient.entity.mime.MultipartEntityBuilder;
 import static java.nio.charset.Charset.forName;
 
 
-public class Imageupload extends AppCompatActivity implements View.OnClickListener {
+public class Imageupload extends AppCompatActivity  implements  View.OnClickListener {
+    private  String name;
 
     private Uri x;
     private Button buttonChoose;
@@ -60,6 +61,7 @@ public class Imageupload extends AppCompatActivity implements View.OnClickListen
 
     private int PICK_IMAGE_REQUEST = 1;
     private int REQUEST_IMAGE_CAPTURE = 2;
+    int count;
 
 
     @Override
@@ -78,6 +80,9 @@ public class Imageupload extends AppCompatActivity implements View.OnClickListen
         buttonChoose.setOnClickListener(this);
         buttonUpload.setOnClickListener(this);
         buttonCapture.setOnClickListener(this);
+        Intent intent = getIntent();
+         name = intent.getStringExtra("name");
+
     }
 
     private void showFileChooser() {
@@ -95,13 +100,17 @@ public class Imageupload extends AppCompatActivity implements View.OnClickListen
         BitmapDrawable drawable = (BitmapDrawable) imageView.getDrawable();
 
         Bitmap bitmap = drawable.getBitmap();
-        new HttpAsyncTask(bitmap,x).execute();
+        new HttpAsyncTask(bitmap,name).execute();
 
 
     }
 
 
     private void dispatchTakePictureIntent() {
+        count=MainActivity.inventories.get(name)+1;
+       MainActivity.inventories.put(name,count);
+
+
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
 
@@ -139,9 +148,11 @@ public class Imageupload extends AppCompatActivity implements View.OnClickListen
             ByteArrayOutputStream bytes = new ByteArrayOutputStream();
            imageBitmap.compress(Bitmap.CompressFormat.JPEG, 40, bytes);
             File f = new File(Environment.getExternalStorageDirectory()
-                    + File.separator + "Imagename.jpg");
+                    + File.separator +name+"_"+count+ "Imagename.jpg");
+            Toast.makeText(getBaseContext(), f.toString(), Toast.LENGTH_LONG).show();
+
             try {
-                f.createNewFile();
+                //f.createNewFile();
             } catch (Exception e) {
             }
             try {
@@ -184,8 +195,8 @@ public class Imageupload extends AppCompatActivity implements View.OnClickListen
     private class HttpAsyncTask extends AsyncTask<String, Void, String> {
 
         private Bitmap bitmap;
-        private Uri x;
-        public HttpAsyncTask(Bitmap bitmap,Uri x){
+        private String x;
+        public HttpAsyncTask(Bitmap bitmap,String x){
             this.bitmap= bitmap;
             this.x=x;
 

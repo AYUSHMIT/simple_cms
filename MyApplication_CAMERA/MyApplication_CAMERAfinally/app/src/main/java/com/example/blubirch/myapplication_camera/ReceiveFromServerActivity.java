@@ -152,6 +152,7 @@ public class ReceiveFromServerActivity extends MainActivity {
                 try {
                     s=e.getString("name");
                     adapter.add( s );
+                    inventories.put(s,0);
 
                 } catch (JSONException e1) {
                     e1.printStackTrace();
@@ -169,7 +170,15 @@ public class ReceiveFromServerActivity extends MainActivity {
                     Toast.makeText(getApplicationContext(),
                             "Click ListItem Number " + position, Toast.LENGTH_LONG)
                             .show();
-                    startActivity(new Intent(ReceiveFromServerActivity.this, Imageupload.class));
+                    Intent i=new Intent(ReceiveFromServerActivity.this, Imageupload.class);
+                    String name = (String) listView.getItemAtPosition(position);
+                    Toast.makeText(getApplicationContext(),
+                            name + position, Toast.LENGTH_LONG)
+                            .show();
+                    System.out.println(name);
+                    counter++;
+                    i.putExtra("name",name);
+                    startActivity(i);
                 }
             });
 
