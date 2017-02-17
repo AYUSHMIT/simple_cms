@@ -17,6 +17,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.loopj.android.http.*;
 
 import org.apache.http.HttpResponse;
@@ -28,6 +29,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.Header;
+
 import java.lang.Object; //com.loopj.android.http.RequestParams;
 
 
@@ -47,7 +49,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     public static Map<String, Integer> inventories = new HashMap<>();
-     public int counter=0;
+    public int counter = 0;
     private static String logtag = "cameraApp";
     private static int TAKE_PICTURE = 1;
     private Uri imageUri;
@@ -97,29 +99,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     };*/
 
 
-        @Override
-        public void onClick(View v) {
-           switch (v.getId()){
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
 
 
-               case R.id.button_camera:
-                   takephoto(v);
-                   break;
-               case R.id.button_upload:
-                   new HttpAsyncTask();
-                    break;
-               case R.id.button_recieve:
+            case R.id.button_camera:
+                takephoto(v);
+                break;
+            case R.id.button_upload:
+                new HttpAsyncTask();
+                break;
+            case R.id.button_recieve:
 
-                   startActivity(new Intent(this, ReceiveFromServerActivity.class));
-                   break;
-               case R.id.button_UploadImage:
+                startActivity(new Intent(this, ReceiveFromServerActivity.class));
+                break;
+            case R.id.button_UploadImage:
 
-                   break;
-           }
-
-
+                break;
         }
 
+
+    }
 
 
     private void takephoto(View v) {
@@ -149,9 +150,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
-        Log.e("Image","intent: "+intent);
+        Log.e("Image", "intent: " + intent);
         if (resultCode == Activity.RESULT_OK) {
-            Log.e("Image","intent: "+intent);
+            Log.e("Image", "intent: " + intent);
             Uri selectedImage = imageUri;
             getContentResolver().notifyChange(selectedImage, null);
 
@@ -168,6 +169,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
     }
+
     private class HttpAsyncTask extends AsyncTask<String, Void, Void> {
         @Override
         protected Void doInBackground(String... urls) {
@@ -207,8 +209,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 e.printStackTrace();
 
             }
-            return null ;
+            return null;
         }
+
         // onPostExecute displays the results of the AsyncTask.
         @Override
         protected void onPostExecute(Void result) {

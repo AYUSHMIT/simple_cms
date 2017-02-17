@@ -5,14 +5,13 @@ package com.example.blubirch.myapplication_camera;
 import android.annotation.TargetApi;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.LruCache;
 import android.view.View;
 import android.widget.Button;
@@ -23,12 +22,9 @@ import android.widget.Toast;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ByteArrayBody;
-import org.apache.http.entity.mime.content.InputStreamBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
@@ -38,17 +34,9 @@ import org.apache.http.params.HttpParams;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
-import java.util.Date;
-
-import cz.msebera.android.httpclient.HttpEntity;
-import cz.msebera.android.httpclient.entity.mime.MultipartEntityBuilder;
-
-import static java.nio.charset.Charset.forName;
 
 
 public class Imageupload extends AppCompatActivity  implements  View.OnClickListener {
@@ -96,14 +84,14 @@ public class Imageupload extends AppCompatActivity  implements  View.OnClickList
         // Use 1/8th of the available memory for this memory cache.
         final int cacheSize = maxMemory / 8;
 
-        mMemoryCache = new LruCache<String, Bitmap>(cacheSize) {
+       /* mMemoryCache = new LruCache<String, Bitmap>(cacheSize) {
             @Override
             protected int sizeOf(String key, Bitmap bitmap) {
                 // The cache size will be measured in kilobytes rather than
                 // number of items.
                 return bitmap.getByteCount() / 1024;
             }
-        };
+        };*/
 
     }
 
@@ -143,7 +131,7 @@ public class Imageupload extends AppCompatActivity  implements  View.OnClickList
     }
 
 
-    public void executeMultipartPost() throws Exception {
+   /* public void executeMultipartPost() throws Exception {
         //BitmapDrawable drawable = (BitmapDrawable) imageView.getDrawable();
 
         //Bitmap bitmap = drawable.getBitmap();
@@ -153,13 +141,13 @@ public class Imageupload extends AppCompatActivity  implements  View.OnClickList
         new HttpAsyncTask(bitmap,i,name).execute();}
 
 
-    }
+    }*/
 
 
     private void dispatchTakePictureIntent() {
         //count=MainActivity.inventories.get(name)+1;
       // MainActivity.inventories.put(name,count);
-a++;
+
 
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
@@ -171,7 +159,7 @@ a++;
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
+         a++;
 
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK) {
 
@@ -198,7 +186,7 @@ a++;
             Bundle extras = data.getExtras();
             Bitmap imageBitmap = (Bitmap) extras.get("data");
             imageBitmap = Bitmap.createScaledBitmap(imageBitmap, 100, 100, false);
-            addBitmapToMemoryCache("image"+a, imageBitmap);
+            MyApp.addBitmapToMemoryCache(name+a, imageBitmap);
             ByteArrayOutputStream bytes = new ByteArrayOutputStream();
            imageBitmap.compress(Bitmap.CompressFormat.JPEG, 40, bytes);
             File f = new File(Environment.getExternalStorageDirectory()
@@ -216,9 +204,31 @@ a++;
                 fo.close();
             } catch (Exception e) {
             }
-
-            imageView.setImageBitmap(imageBitmap);
+            Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+           // imageView.setImageBitmap(imageBitmap);
         }
+       else if(requestCode == REQUEST_IMAGE_CAPTURE && resultCode != RESULT_OK)
+        {
+
+            Intent i=new Intent();
+
+            i.putExtra("name",name);
+            i.putExtra("count",Integer.toString(a));
+          //  i.putExtra("lru",mMemoryCache.toString());
+           // String s = mMemoryCache.toString();
+
+            setResult(1, i);
+            finish();
+
+
+
+
+        }
+
+
+
+
 
 
     }
@@ -232,7 +242,25 @@ a++;
         if (v == buttonCapture) {
             dispatchTakePictureIntent();
         }
+
         if (v == buttonUpload) {
+           /* Intent i=new Intent();
+
+            i.putExtra("name",name);
+            i.putExtra("count",Integer.toString(a));
+            i.putExtra("lru",mMemoryCache.toString());
+            String s = mMemoryCache.toString();
+
+            setResult(1, i);
+            finish();*/
+
+
+
+
+
+        }
+
+     /*   if (v == buttonUpload) {
             // startActivity(new Intent(this, SendToServer.class));
             try {
                 executeMultipartPost();
@@ -241,12 +269,12 @@ a++;
             }
 
 
-        }
+        }*/
 
 
     }
 
-    private class HttpAsyncTask extends AsyncTask<String, Void, String> {
+   private class HttpAsyncTask extends AsyncTask<String, Void, String> {
 
         private Bitmap bitmap;
         private int x;

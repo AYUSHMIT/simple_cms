@@ -2,15 +2,18 @@ package com.example.blubirch.myapplication_camera;
 
 
 
+import android.annotation.TargetApi;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.LruCache;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -55,19 +58,23 @@ public class Imageupload extends AppCompatActivity  implements  View.OnClickList
     private Button buttonChoose;
     private Button buttonUpload;
     private Button buttonCapture;
+    private LruCache<String, Bitmap> mMemoryCache;
 
     private EditText editText;
     private ImageView imageView;
 
     private int PICK_IMAGE_REQUEST = 1;
     private int REQUEST_IMAGE_CAPTURE = 2;
-    int count;
+    private int count=0;
+    private int a=0;
+
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.imageupload);
+        a=0;
 
         buttonUpload = (Button) findViewById(R.id.buttonUpload);
         buttonChoose = (Button) findViewById(R.id.buttonChoose);
@@ -83,7 +90,47 @@ public class Imageupload extends AppCompatActivity  implements  View.OnClickList
         Intent intent = getIntent();
          name = intent.getStringExtra("name");
 
+
+        final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
+
+        // Use 1/8th of the available memory for this memory cache.
+        final int cacheSize = maxMemory / 8;
+
+        mMemoryCache = new LruCache<String, Bitmap>(cacheSize) {
+            @Override
+            protected int sizeOf(String key, Bitmap bitmap) {
+                // The cache size will be measured in kilobytes rather than
+                // number of items.
+                return bitmap.getByteCount() / 1024;
+            }
+        };
+
     }
+
+
+
+
+
+
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
+    public void addBitmapToMemoryCache(String key, Bitmap bitmap) {
+        if (getBitmapFromMemCache(key) == null) {
+            mMemoryCache.put(key, bitmap);
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
+    public Bitmap getBitmapFromMemCache(String key) {
+        return mMemoryCache.get(key);
+    }
+
+
+
+
+
+
+
 
     private void showFileChooser() {
         Intent intent = new Intent();
@@ -97,19 +144,22 @@ public class Imageupload extends AppCompatActivity  implements  View.OnClickList
 
 
     public void executeMultipartPost() throws Exception {
-        BitmapDrawable drawable = (BitmapDrawable) imageView.getDrawable();
+        //BitmapDrawable drawable = (BitmapDrawable) imageView.getDrawable();
 
-        Bitmap bitmap = drawable.getBitmap();
-        new HttpAsyncTask(bitmap,name).execute();
+        //Bitmap bitmap = drawable.getBitmap();
+        for(int i=1;i<=a;i++){
+       Bitmap bitmap = getBitmapFromMemCache("image"+i );
+        //for(int i=1;i<=a;i++)
+        new HttpAsyncTask(bitmap,i,name).execute();}
 
 
     }
 
 
     private void dispatchTakePictureIntent() {
-        count=MainActivity.inventories.get(name)+1;
-       MainActivity.inventories.put(name,count);
-
+        //count=MainActivity.inventories.get(name)+1;
+      // MainActivity.inventories.put(name,count);
+a++;
 
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
@@ -133,6 +183,9 @@ public class Imageupload extends AppCompatActivity  implements  View.OnClickList
                 Bitmap imgBitmap = (Bitmap) MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
                 Toast.makeText(getBaseContext(), "sent!", Toast.LENGTH_LONG).show();
                 System.out.println(filePath);
+
+
+
                 imageView.setImageBitmap(imgBitmap);
 
 
@@ -145,11 +198,12 @@ public class Imageupload extends AppCompatActivity  implements  View.OnClickList
             Bundle extras = data.getExtras();
             Bitmap imageBitmap = (Bitmap) extras.get("data");
             imageBitmap = Bitmap.createScaledBitmap(imageBitmap, 100, 100, false);
+            addBitmapToMemoryCache("image"+a, imageBitmap);
             ByteArrayOutputStream bytes = new ByteArrayOutputStream();
            imageBitmap.compress(Bitmap.CompressFormat.JPEG, 40, bytes);
             File f = new File(Environment.getExternalStorageDirectory()
-                    + File.separator +name+"_"+count+ "Imagename.jpg");
-            Toast.makeText(getBaseContext(), f.toString(), Toast.LENGTH_LONG).show();
+                    + File.separator +name+"_"+a+ "Imagename.jpg");
+           // Toast.makeText(getBaseContext(), f.toString(), Toast.LENGTH_LONG).show();
 
             try {
                 //f.createNewFile();
@@ -195,8 +249,10 @@ public class Imageupload extends AppCompatActivity  implements  View.OnClickList
     private class HttpAsyncTask extends AsyncTask<String, Void, String> {
 
         private Bitmap bitmap;
-        private String x;
-        public HttpAsyncTask(Bitmap bitmap,String x){
+        private int x;
+        private String name;
+        public HttpAsyncTask(Bitmap bitmap,int x,String name){
+            this.name=name;
             this.bitmap= bitmap;
             this.x=x;
 
@@ -215,6 +271,7 @@ public class Imageupload extends AppCompatActivity  implements  View.OnClickList
               //  BitmapDrawable drawable = (BitmapDrawable) imageView.getDrawable();
 
                // Bitmap bitmap = drawable.getBitmap();
+                //bitmap = getBitmapFromMemCache("image" + count);
 
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 50, bos);
 
@@ -225,13 +282,17 @@ public class Imageupload extends AppCompatActivity  implements  View.OnClickList
                 HttpPost postRequest = new HttpPost(
 
                         "http://10.0.2.2:3000/pictures");
+              //  HttpPost postRequest = new HttpPost(
+
+                        //"http://192.168.6.83/pictures");
+
                 System.out.println("hello");
              //   Toast.makeText(getBaseContext(), filepath, Toast.LENGTH_LONG).show();
                // postRequest.addHeader("Content-type", "image/jpeg; charset=\"UTF-8\"");
                 //heads.put("Content-Type", "image/png;charset=utf-8");
               //  postRequest.addHeader("Content-Type", "multipart/form-data");
 
-                String fileName = "abcde.jpg";//String.format("File_%d.png", new Date().getTime());
+                String fileName = x+name+".jpg";//String.format("File_%d.png", new Date().getTime());
                 ByteArrayBody image = new ByteArrayBody(data,fileName);//,"image/jpg", fileName);
 
                 // File file= new File("/mnt/sdcard/forest.png");
@@ -250,8 +311,14 @@ public class Imageupload extends AppCompatActivity  implements  View.OnClickList
               // FileInputStream fileInputStream = new FileInputStream(file);
                // File file=new File(x.toString());
               //  multipartEntity.addBinaryBody("image",file, ContentType.create("image/jpeg"), fileName);
-
+                content c=new content();
+                c.b=image;
+                c.s=name;
+                //  reqEntity.addPart("picture",c);
                reqEntity.addPart("image", image);
+                reqEntity.addPart("myString", new StringBody(name));
+
+                
                 //postRequest.addHeader("Content-Type", "multipart/form-data;");
 
                 //StringBody contentString = new StringBody("multipart/form-data");

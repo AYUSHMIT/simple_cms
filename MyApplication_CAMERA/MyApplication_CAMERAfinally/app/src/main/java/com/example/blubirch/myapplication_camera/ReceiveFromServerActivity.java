@@ -62,8 +62,8 @@ public class ReceiveFromServerActivity extends MainActivity {
         }
 
         // call AsynTask to perform network operation on separate thread
+        //new HttpAsyncTask().execute("http://192.168.6.83:3000/inventories.json");//("http://10.0.2.2:3000/inventories.json");
         new HttpAsyncTask().execute("http://10.0.2.2:3000/inventories.json");
-
     }
 
     public static String GET(String url) {
