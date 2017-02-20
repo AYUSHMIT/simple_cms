@@ -1,18 +1,16 @@
 package com.example.blubirch.myapplication_camera;
 
 
-
 import android.annotation.TargetApi;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.LruCache;
 import android.view.View;
 import android.widget.Button;
@@ -23,12 +21,9 @@ import android.widget.Toast;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ByteArrayBody;
-import org.apache.http.entity.mime.content.InputStreamBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
@@ -38,21 +33,14 @@ import org.apache.http.params.HttpParams;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
-import java.util.Date;
-
-import cz.msebera.android.httpclient.HttpEntity;
-import cz.msebera.android.httpclient.entity.mime.MultipartEntityBuilder;
-
-import static java.nio.charset.Charset.forName;
 
 
 public class Imageupload extends AppCompatActivity  implements  View.OnClickListener {
     private  String name;
+    private String mCurrentPhotoPath;
 
     private Uri x;
     private Button buttonChoose;
@@ -160,8 +148,28 @@ public class Imageupload extends AppCompatActivity  implements  View.OnClickList
         //count=MainActivity.inventories.get(name)+1;
       // MainActivity.inventories.put(name,count);
 a++;
+      //  String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
 
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+//folder stuff
+       // File imagesFolder = new File(Environment.getExternalStorageDirectory(), "MyImages");
+       // imagesFolder.mkdirs();
+
+       // File image = new File(imagesFolder, "QR_" + "hello" + ".png");
+       // mCurrentPhotoPath = "file:" + image.getAbsolutePath();
+        //image.createNewFile();
+     //  Uri uriSavedImage =   FileProvider.getUriForFile(Imageupload.this,
+         //       BuildConfig.APPLICATION_ID + ".provider",
+           //     image);
+     //   Toast.makeText(getBaseContext(),uriSavedImage.toString() , Toast.LENGTH_LONG).show();
+
+       // Uri uriSavedImage = Uri.fromFile(image);
+        final Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+       // takePictureIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
+            //    | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+
+      //  takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, uriSavedImage);
+
+
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
 
             startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
@@ -177,6 +185,7 @@ a++;
 
             Uri filePath = data.getData();
             x=filePath;
+            //mCurrentPhotoPath;
 
 
             try {
@@ -202,8 +211,8 @@ a++;
             ByteArrayOutputStream bytes = new ByteArrayOutputStream();
            imageBitmap.compress(Bitmap.CompressFormat.JPEG, 40, bytes);
             File f = new File(Environment.getExternalStorageDirectory()
-                    + File.separator +name+"_"+a+ "Imagename.jpg");
-           // Toast.makeText(getBaseContext(), f.toString(), Toast.LENGTH_LONG).show();
+                    + File.separator /*+name+"_"+a*/+ "Imagename.jpg");
+            Toast.makeText(getBaseContext(), f.toString(), Toast.LENGTH_LONG).show();
 
             try {
                 //f.createNewFile();
@@ -213,7 +222,7 @@ a++;
                 FileOutputStream fo = new FileOutputStream(f);
 
                 fo.write(bytes.toByteArray());
-                fo.close();
+               fo.close();
             } catch (Exception e) {
             }
 

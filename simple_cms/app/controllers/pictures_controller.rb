@@ -11,6 +11,10 @@ class PicturesController < ApplicationController
   # GET /pictures/1
   # GET /pictures/1.json
   def show
+    @picture = Picture.find(params[:id])
+    #send_file(@picture.image.url, disposition: 'picture')
+    redirect_to @picture.image.url
+    puts "----------params---------#{@picture.image.url.inspect}"
   end
 
   # GET /pictures/new
@@ -34,6 +38,7 @@ class PicturesController < ApplicationController
 
      @picture.image = params["image"]
      @picture.nam = params["myString"]
+     @picture.inventory_id =  params["inventory_id"]
 
      #@picture.name = params["myString"]
 
