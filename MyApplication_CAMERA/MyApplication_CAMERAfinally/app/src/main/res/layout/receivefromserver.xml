@@ -17,15 +17,21 @@
 
     <ListView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="265dp"
         android:id="@+id/l1" />
 
     <EditText
         android:id="@+id/etResponse"
         android:layout_width="match_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="44dp"
         android:ems="10"
         android:layout_marginTop="10dp"
         android:inputType="textMultiLine" />
+
+    <Button
+        android:text="Sync"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/sync" />
 
 </LinearLayout>

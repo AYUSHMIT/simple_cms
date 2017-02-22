@@ -3,17 +3,18 @@ package com.example.blubirch.myapplication_camera;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.util.LruCache;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -36,6 +37,7 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -56,10 +58,10 @@ public class ReceiveFromServerActivity extends MainActivity {
     public ArrayList<image> myString = new ArrayList<image>();
 
     public Button sync;
-
-
-
-
+    public int inventory_id;
+    private File file;
+    MyCustomAdapter adapter;
+    //Intent i=new Intent(ReceiveFromServerActivity.this, Imageupload.class);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,16 +104,16 @@ public class ReceiveFromServerActivity extends MainActivity {
 
 
         // get reference to the views
-        etResponse = (EditText) findViewById(R.id.etResponse);
-        tvIsConnected = (TextView) findViewById(R.id.tvIsConnected);
+       // etResponse = (EditText) findViewById(R.id.etResponse);
+       // tvIsConnected = (TextView) findViewById(R.id.tvIsConnected);
         myListView = (ListView)findViewById(R.id.l1);
         // check if you are connected or not
-        if (isConnected()) {
-            tvIsConnected.setBackgroundColor(0xFF00CC00);
-            tvIsConnected.setText("You are conncted");
-        } else {
-            tvIsConnected.setText("You are NOT conncted");
-        }
+      //  if (isConnected()) {
+//            tvIsConnected.setBackgroundColor(0xFF00CC00);
+           // tvIsConnected.setText("You are conncted");
+      //  } else {
+          //  tvIsConnected.setText("You are NOT conncted");
+      //  }
 
 
 
@@ -128,8 +130,36 @@ public class ReceiveFromServerActivity extends MainActivity {
 
         // call AsynTask to perform network operation on separate thread
         //new HttpAsyncTask().execute("http://192.168.6.83:3000/inventories.json");//("http://10.0.2.2:3000/inventories.json");
-        new HttpAsyncTask().execute("http://192.168.43.137:3000/inventories.json");
+        new HttpAsyncTask().execute("http://192.168.6.83:3000/inventories.json");
     }
+
+    public static void image_upload(Intent i)
+
+    {
+       // Intent i=new Intent(ReceiveFromServerActivity.this, Imageupload.class);
+       // int a= inventory.get(c.name);
+       // i.putExtra("inventory_id",Integer.toString(a));
+       // i.putExtra("name",c.name);
+      //  startActivityForResult(i,1);
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
 
 
     @Override
@@ -138,15 +168,39 @@ public class ReceiveFromServerActivity extends MainActivity {
         if (requestCode == 1) {
             if(resultCode == 1){
                 //String stredittext=data.getStringExtra("edittextvalue");
+              //  Toast.makeText(getBaseContext(), "this is adapter information"+(adapter.countryList.get(1).name), Toast.LENGTH_LONG).show();
+
                 name = data.getStringExtra("name");
                 String a = data.getStringExtra("count");
+                String s = data.getStringExtra("inventory_id");
+                inventory_id = Integer.parseInt(s);
+                ImageView imageview = adapter.findimage(name);
+                if(imageview==null)
+
+               // View i
                 //Toast.makeText(getBaseContext(), a, Toast.LENGTH_LONG).show();
                 if(a!=null)
                     count = Integer.parseInt(a);
                 image image = new image(name,count);
                 myString.add(image);
+                File f = new File(Environment.getExternalStorageDirectory()
+                        + File.separator + name + 1 + ".jpg");
+                if(f.exists())
+                {
+                    Bitmap bitmap = BitmapFactory.decodeFile(f.getAbsolutePath());
+                    if(bitmap!=null)
+                    imageview.setImageBitmap(bitmap);
 
 
+                }
+  imageview.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+          Toast.makeText(getBaseContext(), "this is adapter information"+(name), Toast.LENGTH_LONG).show();
+
+
+      }
+  });
 
 
 
@@ -176,23 +230,32 @@ public class ReceiveFromServerActivity extends MainActivity {
         for (image im : myString) {
             int s = (im.count);
 
-          //  Toast.makeText(getBaseContext(), Integer.toString(im.count), Toast.LENGTH_LONG).show();
-
+            //  Toast.makeText(getBaseContext(), Integer.toString(im.count), Toast.LENGTH_LONG).show();
 
 
             for (int i = 1; i <= im.count; i++) {
-                Bitmap bitmap = MyApp.getBitmapFromMemCache(im.name + i);
-                //for(int i=1;i<=a;i++)
-                new HttpPostTask(bitmap, i, im.name).execute();
+
+
+                    File f = new File(Environment.getExternalStorageDirectory()
+                           + File.separator + im.name + i + ".jpg");
+                boolean b=adapter.findCode(im.name);
+
+                   // if (adapter.findCode(im.name) == true) {
+               // Toast.makeText(getBaseContext(), "array list true or false"+b, Toast.LENGTH_LONG).show();
+
+                        if (f.exists()) {
+                            Bitmap bitmap = BitmapFactory.decodeFile(f.getAbsolutePath()); //MyApp.getBitmapFromMemCache(im.name + i);
+                            Toast.makeText(getBaseContext(), bitmap.toString(), Toast.LENGTH_LONG).show();
+                            //for(int i=1;i<=a;i++)
+                            new HttpPostTask(bitmap, i, im.name).execute();
+                            f.delete();
+                        }
+                   // }
+
             }
 
 
-        }
-    }
-
-
-
-
+        }}
 
 
 
@@ -254,14 +317,17 @@ public class ReceiveFromServerActivity extends MainActivity {
         // onPostExecute displays the results of the AsyncTask.
         @Override
         protected void onPostExecute(String result) {
+
             Toast.makeText(getBaseContext(), "Received!", Toast.LENGTH_LONG).show();
             a=result;
-            ArrayList<String> myStringArray1 = new ArrayList<String>();
-            myStringArray1.add("something");
-           // LinearLayout ll1=(LinearLayout)findViewById(R.id.ll1);
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(ReceiveFromServerActivity.this,R.layout.simplrow,myStringArray1);
-            myListView.setAdapter(adapter);
+            ArrayList<Country> myStringArray1 = new ArrayList<Country>();
+            myStringArray1.add(new Country(0,"something",true));
+            // LinearLayout ll1=(LinearLayout)findViewById(R.id.ll1);
+            // ArrayAdapter<String> adapter = new ArrayAdapter<String>(ReceiveFromServerActivity.this,R.layout.simplrow,myStringArray1);
 
+            //    myListView.setAdapter(adapter);
+            // ArrayList<Country>  = new ArrayList<Country>();
+            Country country;
 
             JSONArray json = null;
 
@@ -281,8 +347,15 @@ public class ReceiveFromServerActivity extends MainActivity {
                 }
                 try {
                     s=e.getString("name");
-                    adapter.add( s );
-                    inventories.put(s,0);
+                    String a=e.getString("id");
+                    Toast.makeText(getApplicationContext(),
+                            "inventory_id" + a, Toast.LENGTH_LONG)
+                            .show();
+                    int id=Integer.parseInt(a);
+                    myStringArray1.add(new Country(id,s,true));
+
+                    //adapter.add( s );
+                    inventory.put(s,id);
 
                 } catch (JSONException e1) {
                     e1.printStackTrace();
@@ -290,27 +363,31 @@ public class ReceiveFromServerActivity extends MainActivity {
 
 
             }
-
+             adapter = new MyCustomAdapter(ReceiveFromServerActivity.this,
+                    R.layout.simplrow,myStringArray1);
 
             myListView.setAdapter( adapter );
-            myListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            /*myListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> listView, View itemView, int position, long itemId)
                 {
-                    Toast.makeText(getApplicationContext(),
+                   /* Toast.makeText(getApplicationContext(),
                             "Click ListItem Number " + position, Toast.LENGTH_LONG)
-                            .show();
-                    Intent i=new Intent(ReceiveFromServerActivity.this, Imageupload.class);
-                    String name = (String) listView.getItemAtPosition(position);
+                            .show();*/
+                 /*   Intent i=new Intent(ReceiveFromServerActivity.this, Imageupload.class);
+                    //String name = (String) listView.getItemAtPosition(position);
+                    Country name = (Country) listView.getItemAtPosition(position);
                     Toast.makeText(getApplicationContext(),
-                            name + position, Toast.LENGTH_LONG)
+                            name.name + position, Toast.LENGTH_LONG)
                             .show();
-                    System.out.println(name);
+                    System.out.println(name.name);
                     counter++;
-                    i.putExtra("name",name);
-                    startActivityForResult(i,1);
-                }
-            });
+                   int a= inventory.get(name.name);
+                    i.putExtra("inventory_id",Integer.toString(a));
+                    i.putExtra("name",name.name);
+                    startActivityForResult(i,1);  */
+               // }
+           // });
 
             /*a=result;
             JSONArray json = null;
@@ -371,7 +448,7 @@ public class ReceiveFromServerActivity extends MainActivity {
 
 
     private class HttpPostTask extends AsyncTask<String, Void, String> {
-
+        private File f;
         private Bitmap bitmap;
         private int x;
         private String name;
@@ -379,6 +456,7 @@ public class ReceiveFromServerActivity extends MainActivity {
             this.name=name;
             this.bitmap= bitmap;
             this.x=x;
+            this.f=f;
 
         }
 
@@ -405,7 +483,7 @@ public class ReceiveFromServerActivity extends MainActivity {
 
                 HttpPost postRequest = new HttpPost(
 
-                        "http://192.168.43.137:3000/pictures");
+                        "http://192.168.6.83:3000/pictures");
                 //  HttpPost postRequest = new HttpPost(
 
                 //"http://192.168.6.83/pictures");
@@ -441,6 +519,7 @@ public class ReceiveFromServerActivity extends MainActivity {
                 //  reqEntity.addPart("picture",c);
                 reqEntity.addPart("image", image);
                 reqEntity.addPart("myString", new StringBody(name));
+                reqEntity.addPart("inventory_id",new StringBody(Integer.toString(inventory_id)));
 
 
                 //postRequest.addHeader("Content-Type", "multipart/form-data;");

@@ -9,41 +9,15 @@
     android:orientation="vertical" >
 
     
-    <Button
-        android:id="@+id/button_camera"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Camera" />
-    
-    <ImageView
-        android:id="@+id/image_camera"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
 
-    <Button
-        android:id="@+id/button_upload"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Upload Data" />
     <Button
         android:id="@+id/button_recieve"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Receive Data" />
 
-    <Button
-        android:id="@+id/button_UploadImage"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="UploadImage" />
 
-    <EditText
-        android:id="@+id/etResponse"
-        android:layout_width="match_parent"
-        android:layout_height="fill_parent"
-        android:ems="10"
-        android:layout_marginTop="10dp"
-        android:inputType="textMultiLine" />
+
 
 
 </LinearLayout>

@@ -2,16 +2,18 @@ package com.example.blubirch.myapplication_camera;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.LruCache;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,18 +21,25 @@ import android.widget.Toast;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.ByteArrayBody;
+import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-
-import static android.R.attr.name;
 
 /**
  * Created by blubirch on 10/1/17.
@@ -42,12 +51,55 @@ public class ReceiveFromServerActivity extends MainActivity {
     public String a, title;
     ListView myListView;
     public int i;
+    public String name;
+    public int count;
+    public ArrayList<image> myString = new ArrayList<image>();
+
+    public Button sync;
+
+
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.receivefromserver);
+        count=0;
+        name=null;
+
+        Intent intent = getIntent();
+
+
+        sync = (Button) findViewById(R.id.sync);
+        sync.setOnClickListener(this);
+
+
+
+
+
+
+
+        final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
+        final int cacheSize = maxMemory / 8;
+
+        MyApp.mMemoryCache = new LruCache<String, Bitmap>(cacheSize) {
+            @Override
+            protected int sizeOf(String key, Bitmap bitmap) {
+                // The cache size will be measured in kilobytes rather than
+                // number of items.
+                return bitmap.getByteCount() / 1024;
+            }
+        };
+
+
+
+
+
+
+
+
 
         // get reference to the views
         etResponse = (EditText) findViewById(R.id.etResponse);
@@ -61,10 +113,88 @@ public class ReceiveFromServerActivity extends MainActivity {
             tvIsConnected.setText("You are NOT conncted");
         }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
         // call AsynTask to perform network operation on separate thread
         //new HttpAsyncTask().execute("http://192.168.6.83:3000/inventories.json");//("http://10.0.2.2:3000/inventories.json");
-        new HttpAsyncTask().execute("http://10.0.2.2:3000/inventories.json");
+        new HttpAsyncTask().execute("http://192.168.43.137:3000/inventories.json");
     }
+
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1) {
+            if(resultCode == 1){
+                //String stredittext=data.getStringExtra("edittextvalue");
+                name = data.getStringExtra("name");
+                String a = data.getStringExtra("count");
+                //Toast.makeText(getBaseContext(), a, Toast.LENGTH_LONG).show();
+                if(a!=null)
+                    count = Integer.parseInt(a);
+                image image = new image(name,count);
+                myString.add(image);
+
+
+
+
+
+            }
+        }
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (v == sync) {
+
+
+            try {
+
+                executeMultipartPost();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }}
+
+    public void executeMultipartPost() throws Exception {
+        //BitmapDrawable drawable = (BitmapDrawable) imageView.getDrawable();
+
+        //Bitmap bitmap = drawable.getBitmap();
+
+
+        for (image im : myString) {
+            int s = (im.count);
+
+          //  Toast.makeText(getBaseContext(), Integer.toString(im.count), Toast.LENGTH_LONG).show();
+
+
+
+            for (int i = 1; i <= im.count; i++) {
+                Bitmap bitmap = MyApp.getBitmapFromMemCache(im.name + i);
+                //for(int i=1;i<=a;i++)
+                new HttpPostTask(bitmap, i, im.name).execute();
+            }
+
+
+        }
+    }
+
+
+
+
+
+
 
     public static String GET(String url) {
         InputStream inputStream = null;
@@ -178,7 +308,7 @@ public class ReceiveFromServerActivity extends MainActivity {
                     System.out.println(name);
                     counter++;
                     i.putExtra("name",name);
-                    startActivity(i);
+                    startActivityForResult(i,1);
                 }
             });
 
@@ -231,5 +361,156 @@ public class ReceiveFromServerActivity extends MainActivity {
 
         }
     }
+
+
+
+
+
+
+
+
+
+    private class HttpPostTask extends AsyncTask<String, Void, String> {
+
+        private Bitmap bitmap;
+        private int x;
+        private String name;
+        public HttpPostTask(Bitmap bitmap,int x,String name){
+            this.name=name;
+            this.bitmap= bitmap;
+            this.x=x;
+
+        }
+
+
+
+
+        @Override
+        protected String doInBackground(String... urls) {
+            try {
+
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+
+
+                //  BitmapDrawable drawable = (BitmapDrawable) imageView.getDrawable();
+
+                // Bitmap bitmap = drawable.getBitmap();
+                //bitmap = getBitmapFromMemCache("image" + count);
+
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 50, bos);
+
+                byte[] data = bos.toByteArray();
+
+                HttpClient httpClient = new DefaultHttpClient();
+
+                HttpPost postRequest = new HttpPost(
+
+                        "http://192.168.43.137:3000/pictures");
+                //  HttpPost postRequest = new HttpPost(
+
+                //"http://192.168.6.83/pictures");
+
+                System.out.println("hello");
+                //   Toast.makeText(getBaseContext(), filepath, Toast.LENGTH_LONG).show();
+                // postRequest.addHeader("Content-type", "image/jpeg; charset=\"UTF-8\"");
+                //heads.put("Content-Type", "image/png;charset=utf-8");
+                //  postRequest.addHeader("Content-Type", "multipart/form-data");
+
+                String fileName = x+name+".jpg";//String.format("File_%d.png", new Date().getTime());
+                ByteArrayBody image = new ByteArrayBody(data,fileName);//,"image/jpg", fileName);
+
+                // File file= new File("/mnt/sdcard/forest.png");
+
+                // FileBody bin = new FileBody(file);
+
+                MultipartEntity reqEntity = new MultipartEntity(
+
+
+                        HttpMultipartMode.BROWSER_COMPATIBLE);// null//,  Charset.forName("UTF-8")//);
+
+                // MultipartEntityBuilder multipartEntity  = MultipartEntityBuilder.create();
+                // multipartEntity.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+
+                // File file = new File(x.toString());
+                // FileInputStream fileInputStream = new FileInputStream(file);
+                // File file=new File(x.toString());
+                //  multipartEntity.addBinaryBody("image",file, ContentType.create("image/jpeg"), fileName);
+                content c=new content();
+                c.b=image;
+                c.s=name;
+                //  reqEntity.addPart("picture",c);
+                reqEntity.addPart("image", image);
+                reqEntity.addPart("myString", new StringBody(name));
+
+
+                //postRequest.addHeader("Content-Type", "multipart/form-data;");
+
+                //StringBody contentString = new StringBody("multipart/form-data");
+                // reqEntity.addPart("Content-Type",contentString);
+                // reqEntity.addPart("image", new InputStreamBody(fileInputStream,"image/jpeg",fileName));
+
+                postRequest.setEntity(reqEntity);
+                //HttpEntity reqEntity = multipartEntity.build();
+                //postRequest.setEntity();
+
+
+                int timeoutConnection = 60000;
+                HttpParams httpParameters = new BasicHttpParams();
+                HttpConnectionParams.setConnectionTimeout(httpParameters,
+                        timeoutConnection);
+                int timeoutSocket = 60000;
+                HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
+                HttpConnectionParams.setTcpNoDelay(httpParameters, true);
+
+                HttpResponse response = httpClient.execute(postRequest);
+
+
+
+                BufferedReader reader = new BufferedReader(new InputStreamReader(
+
+                        response.getEntity().getContent(), "UTF-8"));
+
+                String sResponse;
+
+                StringBuilder s = new StringBuilder();
+
+                while ((sResponse = reader.readLine()) != null) {
+
+                    s = s.append(sResponse);
+
+                }
+
+                System.out.println("Response: " + s);
+                return sResponse;
+
+            } catch (Exception e) {
+
+                // handle exception here
+                e.printStackTrace();
+                return null;
+
+                // Log.e(e.getClass().getName(), e.getMessage());
+
+            }
+
+
+        }
+
+        // onPostExecute displays the results of the AsyncTask.
+        @Override
+        protected void onPostExecute(String result) {
+            Toast.makeText(getBaseContext(), "sent!", Toast.LENGTH_LONG).show();
+
+        }
+    }
+
+
+
+
+
+
+
+
+
 }
 

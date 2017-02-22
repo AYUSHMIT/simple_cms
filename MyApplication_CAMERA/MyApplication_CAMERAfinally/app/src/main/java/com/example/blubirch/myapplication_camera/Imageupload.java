@@ -1,6 +1,7 @@
 package com.example.blubirch.myapplication_camera;
 
 
+
 import android.annotation.TargetApi;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -40,7 +41,6 @@ import java.io.InputStreamReader;
 
 public class Imageupload extends AppCompatActivity  implements  View.OnClickListener {
     private  String name;
-    private String mCurrentPhotoPath;
 
     private Uri x;
     private Button buttonChoose;
@@ -84,14 +84,14 @@ public class Imageupload extends AppCompatActivity  implements  View.OnClickList
         // Use 1/8th of the available memory for this memory cache.
         final int cacheSize = maxMemory / 8;
 
-        mMemoryCache = new LruCache<String, Bitmap>(cacheSize) {
+       /* mMemoryCache = new LruCache<String, Bitmap>(cacheSize) {
             @Override
             protected int sizeOf(String key, Bitmap bitmap) {
                 // The cache size will be measured in kilobytes rather than
                 // number of items.
                 return bitmap.getByteCount() / 1024;
             }
-        };
+        };*/
 
     }
 
@@ -131,7 +131,7 @@ public class Imageupload extends AppCompatActivity  implements  View.OnClickList
     }
 
 
-    public void executeMultipartPost() throws Exception {
+   /* public void executeMultipartPost() throws Exception {
         //BitmapDrawable drawable = (BitmapDrawable) imageView.getDrawable();
 
         //Bitmap bitmap = drawable.getBitmap();
@@ -141,35 +141,15 @@ public class Imageupload extends AppCompatActivity  implements  View.OnClickList
         new HttpAsyncTask(bitmap,i,name).execute();}
 
 
-    }
+    }*/
 
 
     private void dispatchTakePictureIntent() {
         //count=MainActivity.inventories.get(name)+1;
       // MainActivity.inventories.put(name,count);
-a++;
-      //  String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-
-//folder stuff
-       // File imagesFolder = new File(Environment.getExternalStorageDirectory(), "MyImages");
-       // imagesFolder.mkdirs();
-
-       // File image = new File(imagesFolder, "QR_" + "hello" + ".png");
-       // mCurrentPhotoPath = "file:" + image.getAbsolutePath();
-        //image.createNewFile();
-     //  Uri uriSavedImage =   FileProvider.getUriForFile(Imageupload.this,
-         //       BuildConfig.APPLICATION_ID + ".provider",
-           //     image);
-     //   Toast.makeText(getBaseContext(),uriSavedImage.toString() , Toast.LENGTH_LONG).show();
-
-       // Uri uriSavedImage = Uri.fromFile(image);
-        final Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-       // takePictureIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
-            //    | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-
-      //  takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, uriSavedImage);
 
 
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
 
             startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
@@ -179,13 +159,12 @@ a++;
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
+         a++;
 
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK) {
 
             Uri filePath = data.getData();
             x=filePath;
-            //mCurrentPhotoPath;
 
 
             try {
@@ -207,12 +186,12 @@ a++;
             Bundle extras = data.getExtras();
             Bitmap imageBitmap = (Bitmap) extras.get("data");
             imageBitmap = Bitmap.createScaledBitmap(imageBitmap, 100, 100, false);
-            addBitmapToMemoryCache("image"+a, imageBitmap);
+            MyApp.addBitmapToMemoryCache(name+a, imageBitmap);
             ByteArrayOutputStream bytes = new ByteArrayOutputStream();
            imageBitmap.compress(Bitmap.CompressFormat.JPEG, 40, bytes);
             File f = new File(Environment.getExternalStorageDirectory()
-                    + File.separator /*+name+"_"+a*/+ "Imagename.jpg");
-            Toast.makeText(getBaseContext(), f.toString(), Toast.LENGTH_LONG).show();
+                    + File.separator +name+"_"+a+ "Imagename.jpg");
+           // Toast.makeText(getBaseContext(), f.toString(), Toast.LENGTH_LONG).show();
 
             try {
                 //f.createNewFile();
@@ -222,12 +201,34 @@ a++;
                 FileOutputStream fo = new FileOutputStream(f);
 
                 fo.write(bytes.toByteArray());
-               fo.close();
+                fo.close();
             } catch (Exception e) {
             }
-
-            imageView.setImageBitmap(imageBitmap);
+            Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+           // imageView.setImageBitmap(imageBitmap);
         }
+       else if(requestCode == REQUEST_IMAGE_CAPTURE && resultCode != RESULT_OK)
+        {
+
+            Intent i=new Intent();
+
+            i.putExtra("name",name);
+            i.putExtra("count",Integer.toString(a));
+          //  i.putExtra("lru",mMemoryCache.toString());
+           // String s = mMemoryCache.toString();
+
+            setResult(1, i);
+            finish();
+
+
+
+
+        }
+
+
+
+
 
 
     }
@@ -241,7 +242,25 @@ a++;
         if (v == buttonCapture) {
             dispatchTakePictureIntent();
         }
+
         if (v == buttonUpload) {
+           /* Intent i=new Intent();
+
+            i.putExtra("name",name);
+            i.putExtra("count",Integer.toString(a));
+            i.putExtra("lru",mMemoryCache.toString());
+            String s = mMemoryCache.toString();
+
+            setResult(1, i);
+            finish();*/
+
+
+
+
+
+        }
+
+     /*   if (v == buttonUpload) {
             // startActivity(new Intent(this, SendToServer.class));
             try {
                 executeMultipartPost();
@@ -250,12 +269,12 @@ a++;
             }
 
 
-        }
+        }*/
 
 
     }
 
-    private class HttpAsyncTask extends AsyncTask<String, Void, String> {
+   private class HttpAsyncTask extends AsyncTask<String, Void, String> {
 
         private Bitmap bitmap;
         private int x;
