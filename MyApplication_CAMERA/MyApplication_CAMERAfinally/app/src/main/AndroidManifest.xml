@@ -33,7 +33,7 @@
         </activity>
         <activity android:name=".ReceiveFromServerActivity"/>
         <activity android:name=".Imageupload"
-
+            android:theme="@android:style/Theme.Holo.Light.Dialog"
             >
 
 

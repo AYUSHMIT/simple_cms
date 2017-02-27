@@ -6,12 +6,7 @@ import org.apache.http.entity.mime.content.ByteArrayBody;
  * Created by blubirch on 8/2/17.
  */
 
-public class content {
-
-public ByteArrayBody b;
+public class Content {
+    public ByteArrayBody b;
     public String s;
-
-
-
-
 }

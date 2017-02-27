@@ -28,11 +28,13 @@ dependencies {
     android {
         useLibrary 'org.apache.http.legacy'
     }
-    compile 'com.android.support:appcompat-v7:25.1.0'
+    compile files('libs/httpmime-4.1.1.jar')
+    compile 'com.android.support:appcompat-v7:25.1.1'
     compile 'org.apache.httpcomponents:httpcore:4.4.1'
     compile 'org.apache.httpcomponents:httpclient:4.5'
     compile 'com.loopj.android:android-async-http:1.4.9'
-    testCompile 'junit:junit:4.12'
-    compile files('libs/httpmime-4.1.1.jar')
     compile 'com.android.support.test.espresso:espresso-core:2.2.2'
+    compile 'com.android.support:design:25.1.1'
+    testCompile 'junit:junit:4.12'
+    compile 'com.google.android.gms:play-services-appindexing:8.4.0'
 }

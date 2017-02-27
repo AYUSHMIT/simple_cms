@@ -49,7 +49,7 @@ public class SendToServer extends AppCompatActivity {
     public void pickPhoto(View view) {
         //TODO: launch the photo picker
         Intent intent = new Intent();
-        intent.setType("image/*");
+        intent.setType("Image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
         startActivityForResult(Intent.createChooser(intent,
                 "Select Picture"), SELECT_PICTURE);
@@ -79,7 +79,7 @@ public class SendToServer extends AppCompatActivity {
         cursor.moveToFirst();
         String filePath = cursor.getString(column_index);
         cursor.close();
-        // Convert file path into bitmap image using below line.
+        // Convert file path into bitmap Image using below line.
         //  Bitmap bitmap = BitmapFactory.decodeFile(filePath);]
         Bitmap bitmap=BitmapFactory.decodeStream(getContentResolver().openInputStream(uri));
 

@@ -19,7 +19,7 @@ import android.widget.ImageView;
 
        // public   String code = null;
         public String name = null;
-        public boolean selected=false;
+        public boolean selected ;
 
         public Country(int inventory_id, String name, boolean selected) {
             super();

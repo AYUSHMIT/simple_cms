@@ -55,7 +55,7 @@ public class ReceiveFromServerActivity extends MainActivity {
     public int i;
     public String name;
     public int count;
-    public ArrayList<image> myString = new ArrayList<image>();
+    public ArrayList<Image> myString = new ArrayList<Image>();
 
     public Button sync;
     public int inventory_id;
@@ -171,20 +171,23 @@ public class ReceiveFromServerActivity extends MainActivity {
               //  Toast.makeText(getBaseContext(), "this is adapter information"+(adapter.countryList.get(1).name), Toast.LENGTH_LONG).show();
 
                 name = data.getStringExtra("name");
-                String a = data.getStringExtra("count");
+                final String a = data.getStringExtra("ImageCount");
+                //a++;
+
                 String s = data.getStringExtra("inventory_id");
                 inventory_id = Integer.parseInt(s);
                 ImageView imageview = adapter.findimage(name);
                 if(imageview==null)
 
                // View i
-                //Toast.makeText(getBaseContext(), a, Toast.LENGTH_LONG).show();
+                Toast.makeText(getBaseContext(), a, Toast.LENGTH_LONG).show();
                 if(a!=null)
                     count = Integer.parseInt(a);
-                image image = new image(name,count);
-                myString.add(image);
+                Toast.makeText(getBaseContext(), "counter"+Integer.toString(count), Toast.LENGTH_LONG).show();
+                Image Image = new Image(name,count);
+                myString.add(Image);
                 File f = new File(Environment.getExternalStorageDirectory()
-                        + File.separator + name + 1 + ".jpg");
+                        + File.separator + name + 2 + ".jpg");
                 if(f.exists())
                 {
                     Bitmap bitmap = BitmapFactory.decodeFile(f.getAbsolutePath());
@@ -196,8 +199,13 @@ public class ReceiveFromServerActivity extends MainActivity {
   imageview.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-          Toast.makeText(getBaseContext(), "this is adapter information"+(name), Toast.LENGTH_LONG).show();
+        //  Toast.makeText(getBaseContext(), "this is adapter information"+(name), Toast.LENGTH_LONG).show();
+          Intent i=new Intent(ReceiveFromServerActivity.this, ImageViewer.class);
+          i.putExtra("name",name);
+          i.putExtra("inventory_id",inventory_id);
 
+          i.putExtra("ImageCount",a);
+          startActivity(i);
 
       }
   });
@@ -225,15 +233,15 @@ public class ReceiveFromServerActivity extends MainActivity {
         //BitmapDrawable drawable = (BitmapDrawable) imageView.getDrawable();
 
         //Bitmap bitmap = drawable.getBitmap();
+        //Toast.makeText(getBaseContext(), "array list true or false"+1, Toast.LENGTH_LONG).show();
+
+        for (Image im : myString) {
+            int s = (im.ImageCount);
+            Toast.makeText(getBaseContext(), Integer.toString(s), Toast.LENGTH_LONG).show();
+            //  Toast.makeText(getBaseContext(), Integer.toString(im.ImageCount), Toast.LENGTH_LONG).show();
 
 
-        for (image im : myString) {
-            int s = (im.count);
-
-            //  Toast.makeText(getBaseContext(), Integer.toString(im.count), Toast.LENGTH_LONG).show();
-
-
-            for (int i = 1; i <= im.count; i++) {
+            for (int i = 1; i <= im.ImageCount; i++) {
 
 
                     File f = new File(Environment.getExternalStorageDirectory()
@@ -241,11 +249,11 @@ public class ReceiveFromServerActivity extends MainActivity {
                 boolean b=adapter.findCode(im.name);
 
                    // if (adapter.findCode(im.name) == true) {
-               // Toast.makeText(getBaseContext(), "array list true or false"+b, Toast.LENGTH_LONG).show();
+
 
                         if (f.exists()) {
                             Bitmap bitmap = BitmapFactory.decodeFile(f.getAbsolutePath()); //MyApp.getBitmapFromMemCache(im.name + i);
-                            Toast.makeText(getBaseContext(), bitmap.toString(), Toast.LENGTH_LONG).show();
+                           // Toast.makeText(getBaseContext(), bitmap.toString(), Toast.LENGTH_LONG).show();
                             //for(int i=1;i<=a;i++)
                             new HttpPostTask(bitmap, i, im.name).execute();
                             f.delete();
@@ -348,14 +356,14 @@ public class ReceiveFromServerActivity extends MainActivity {
                 try {
                     s=e.getString("name");
                     String a=e.getString("id");
-                    Toast.makeText(getApplicationContext(),
-                            "inventory_id" + a, Toast.LENGTH_LONG)
-                            .show();
+                  //  Toast.makeText(getApplicationContext(),
+                         //   "inventory_id" + a, Toast.LENGTH_LONG)
+                           // .show();
                     int id=Integer.parseInt(a);
                     myStringArray1.add(new Country(id,s,true));
 
                     //adapter.add( s );
-                    inventory.put(s,id);
+                  //  inventory.put(s,id);
 
                 } catch (JSONException e1) {
                     e1.printStackTrace();
@@ -473,7 +481,7 @@ public class ReceiveFromServerActivity extends MainActivity {
                 //  BitmapDrawable drawable = (BitmapDrawable) imageView.getDrawable();
 
                 // Bitmap bitmap = drawable.getBitmap();
-                //bitmap = getBitmapFromMemCache("image" + count);
+                //bitmap = getBitmapFromMemCache("Image" + ImageCount);
 
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 50, bos);
 
@@ -490,12 +498,12 @@ public class ReceiveFromServerActivity extends MainActivity {
 
                 System.out.println("hello");
                 //   Toast.makeText(getBaseContext(), filepath, Toast.LENGTH_LONG).show();
-                // postRequest.addHeader("Content-type", "image/jpeg; charset=\"UTF-8\"");
-                //heads.put("Content-Type", "image/png;charset=utf-8");
+                // postRequest.addHeader("Content-type", "Image/jpeg; charset=\"UTF-8\"");
+                //heads.put("Content-Type", "Image/png;charset=utf-8");
                 //  postRequest.addHeader("Content-Type", "multipart/form-data");
 
                 String fileName = x+name+".jpg";//String.format("File_%d.png", new Date().getTime());
-                ByteArrayBody image = new ByteArrayBody(data,fileName);//,"image/jpg", fileName);
+                ByteArrayBody image = new ByteArrayBody(data,fileName);//,"Image/jpg", fileName);
 
                 // File file= new File("/mnt/sdcard/forest.png");
 
@@ -512,8 +520,8 @@ public class ReceiveFromServerActivity extends MainActivity {
                 // File file = new File(x.toString());
                 // FileInputStream fileInputStream = new FileInputStream(file);
                 // File file=new File(x.toString());
-                //  multipartEntity.addBinaryBody("image",file, ContentType.create("image/jpeg"), fileName);
-                content c=new content();
+                //  multipartEntity.addBinaryBody("Image",file, ContentType.create("Image/jpeg"), fileName);
+                Content c=new Content();
                 c.b=image;
                 c.s=name;
                 //  reqEntity.addPart("picture",c);
@@ -526,7 +534,7 @@ public class ReceiveFromServerActivity extends MainActivity {
 
                 //StringBody contentString = new StringBody("multipart/form-data");
                 // reqEntity.addPart("Content-Type",contentString);
-                // reqEntity.addPart("image", new InputStreamBody(fileInputStream,"image/jpeg",fileName));
+                // reqEntity.addPart("Image", new InputStreamBody(fileInputStream,"Image/jpeg",fileName));
 
                 postRequest.setEntity(reqEntity);
                 //HttpEntity reqEntity = multipartEntity.build();

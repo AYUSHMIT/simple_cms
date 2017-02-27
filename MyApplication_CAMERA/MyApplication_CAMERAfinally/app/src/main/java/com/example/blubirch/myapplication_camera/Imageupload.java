@@ -1,8 +1,8 @@
 package com.example.blubirch.myapplication_camera;
 
 
-
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -11,7 +11,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.support.v7.app.AppCompatActivity;
 import android.util.LruCache;
 import android.view.View;
 import android.widget.Button;
@@ -39,7 +38,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 
-public class Imageupload extends AppCompatActivity  implements  View.OnClickListener {
+public class Imageupload extends Activity implements  View.OnClickListener {
     private  String name;
 
     private Uri x;
@@ -47,7 +46,7 @@ public class Imageupload extends AppCompatActivity  implements  View.OnClickList
     private Button buttonUpload;
     private Button buttonCapture;
     private LruCache<String, Bitmap> mMemoryCache;
-
+   private File file;
     private EditText editText;
     private ImageView imageView;
 
@@ -55,6 +54,7 @@ public class Imageupload extends AppCompatActivity  implements  View.OnClickList
     private int REQUEST_IMAGE_CAPTURE = 2;
     private int count=0;
     private int a=0;
+    private int inventory_id;
 
 
 
@@ -64,19 +64,20 @@ public class Imageupload extends AppCompatActivity  implements  View.OnClickList
         setContentView(R.layout.imageupload);
         a=0;
 
-        buttonUpload = (Button) findViewById(R.id.buttonUpload);
+       // buttonUpload = (Button) findViewById(R.id.buttonUpload);
         buttonChoose = (Button) findViewById(R.id.buttonChoose);
         buttonCapture = (Button) findViewById(R.id.buttonCapture);
 
 
-        editText = (EditText) findViewById(R.id.editText);
+       // editText = (EditText) findViewById(R.id.editText);
         imageView = (ImageView) findViewById(R.id.imageView);
 
         buttonChoose.setOnClickListener(this);
-        buttonUpload.setOnClickListener(this);
+//        buttonUpload.setOnClickListener(this);
         buttonCapture.setOnClickListener(this);
         Intent intent = getIntent();
          name = intent.getStringExtra("name");
+        inventory_id=Integer.parseInt(intent.getStringExtra("inventory_id"));
 
 
         final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
@@ -174,6 +175,7 @@ public class Imageupload extends AppCompatActivity  implements  View.OnClickList
 
 
 
+
                 imageView.setImageBitmap(imgBitmap);
 
 
@@ -190,7 +192,7 @@ public class Imageupload extends AppCompatActivity  implements  View.OnClickList
             ByteArrayOutputStream bytes = new ByteArrayOutputStream();
            imageBitmap.compress(Bitmap.CompressFormat.JPEG, 40, bytes);
             File f = new File(Environment.getExternalStorageDirectory()
-                    + File.separator +name+"_"+a+ "Imagename.jpg");
+                    + File.separator +name+a+ ".jpg");
            // Toast.makeText(getBaseContext(), f.toString(), Toast.LENGTH_LONG).show();
 
             try {
@@ -214,6 +216,7 @@ public class Imageupload extends AppCompatActivity  implements  View.OnClickList
             Intent i=new Intent();
 
             i.putExtra("name",name);
+            i.putExtra("inventory_id",Integer.toString(inventory_id));
             i.putExtra("count",Integer.toString(a));
           //  i.putExtra("lru",mMemoryCache.toString());
            // String s = mMemoryCache.toString();

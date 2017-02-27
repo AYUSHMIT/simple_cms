@@ -119,7 +119,7 @@ public final class DiskLruCache implements Closeable {
      *
      * The first five lines of the journal form its header. They are the
      * constant string "libcore.io.DiskLruCache", the disk cache's version,
-     * the application's version, the value count, and a blank line.
+     * the application's version, the value ImageCount, and a blank line.
      *
      * Each of the subsequent lines in the file is a record of the state of a
      * cache entry. Each line contains space-separated values: a state, a key,
@@ -777,7 +777,7 @@ public final class DiskLruCache implements Closeable {
     public OutputStream newOutputStream(int index) throws IOException {
       if (index < 0 || index >= valueCount) {
         throw new IllegalArgumentException("Expected index " + index + " to "
-                + "be greater than 0 and less than the maximum value count "
+                + "be greater than 0 and less than the maximum value ImageCount "
                 + "of " + valueCount);
       }
       synchronized (DiskLruCache.this) {
